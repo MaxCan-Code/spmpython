@@ -58,3 +58,11 @@ for n in range(0,3*plotgap+1):
     vvold = vv
     vv = vvnew
 plt.show()
+
+def main():
+    N = 24
+    solve_and_plot(fft2D, N)
+
+    
+main()
+
