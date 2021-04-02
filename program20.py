@@ -11,6 +11,7 @@ from mpl_toolkits.mplot3d import axes3d
 from scipy.interpolate import interp2d
 from numpy.linalg import matrix_power
 
+def solve_and_plot(sp_diff, N):
 # Grid and initital data
 N = 24
 x = cos(pi*arange(0,N+1)/N)
@@ -37,6 +38,8 @@ for n in range(0,3*plotgap+1):
         ax.set_ylim(-1, 1)
         ax.set_zlim(-0.15, 1)
         ax.text2D(0.05, 0.95, 't = '+str(round(t, 2)), transform=ax.transAxes)
+
+def fft2D(N, vv, x, y):
     uxx = zeros((N+1,N+1))
     uyy = zeros((N+1,N+1))
     ii = arange(1,N)
@@ -54,9 +57,23 @@ for n in range(0,3*plotgap+1):
         W1 = real(fft.ifft(1j*hstack([arange(0,N), 0, arange(1-N,0)]).T*U))     # diff wrt theta
         W2 = real(fft.ifft(-hstack([arange(0,N+1), arange(1-N,0)]).T**2*U))       # diff**2 wrt theta
         uyy[ii,k] = W2[ii]/(1-y[ii]**2) - y[ii]*W1[ii]/(1-y[ii]**2)**(3./2)
-    vvnew = 2*vv - vvold + (uxx+uyy)*dt**2
+    return uxx+uyy
+
+def time_step(vvold, vv, Δvv, dt):
+    # leap frog
+    vvnew = 2*vv - vvold + Δvv*dt**2
     vvold = vv
     vv = vvnew
+
+    # Euler (fwd)
+    # dt *= 8.5e-3
+    # vv += dt * Δvv
+
+    return vvold,vv
+
+    # Δvv= sp_diff(N, vv, x, y)
+    Δvv = fft2D(N, vv, x, y)
+    vvold, vv = time_step(vvold, vv, Δvv, dt)
 plt.show()
 
 def main():
